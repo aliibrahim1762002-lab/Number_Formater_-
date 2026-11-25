@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Number Formatter</title>
+<style>
+:root {
+  --bg: #f6f7f9; --card: #ffffff; --text: #1a1d21; --muted: #667085;
+  --border: #d0d5dd; --accent: #2563eb; --accent-text: #ffffff;
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111418; --card: #1b1f25; --text: #e8eaed; --muted: #98a2b3;
+    --border: #3a414b; --accent: #5b8def; --accent-text: #0b1220;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111418; --card: #1b1f25; --text: #e8eaed; --muted: #98a2b3;
+  --border: #3a414b; --accent: #5b8def; --accent-text: #0b1220;
+  color-scheme: dark;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  padding: 24px 16px;
+}
+main { max-width: 760px; margin: 0 auto; }
+h1 { font-size: 1.4rem; margin: 0 0 4px; }
+p.sub { color: var(--muted); margin: 0 0 20px; font-size: .95rem; }
+label { display: block; font-weight: 600; margin: 16px 0 6px; font-size: .9rem; }
+textarea {
+  width: 100%; box-sizing: border-box; min-height: 160px; padding: 12px;
+  background: var(--card); color: var(--text);
+  border: 1px solid var(--border); border-radius: 10px;
+  font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  resize: vertical;
+}
+textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; align-items: center; }
+button {
+  padding: 10px 18px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--card); color: var(--text); font-size: .95rem; cursor: pointer;
+}
+button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
+#count { color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Number Formatter</h1>
+  <p class="sub">Paste one number per line. Each number becomes <code>N*</code> and <code>+N*</code>, joined with commas.</p>
+
+  <label for="input">Input</label>
+  <textarea id="input" placeholder="256786045680&#10;256776951642&#10;4915124620358"></textarea>
+
+  <div class="row">
+    <button class="primary" id="go">Convert</button>
+    <button id="copy">Copy result</button>
+    <button id="clear">Clear</button>
+    <span id="count"></span>
+  </div>
+
+  <label for="output">Output</label>
+  <textarea id="output" readonly></textarea>
+</main>
+
+<script>
+const input = document.getElementById('input');
+const output = document.getElementById('output');
+const count = document.getElementById('count');
+
+function convert() {
+  const nums = input.value
+    .split(/[\s,;]+/)
+    .map(s => s.replace(/\D/g, ''))
+    .filter(Boolean);
+  output.value = nums.map(n => n + '*,+' + n + '*').join(',');
+  count.textContent = nums.length ? nums.length + ' numbers' : '';
+}
+
+document.getElementById('go').addEventListener('click', convert);
+input.addEventListener('input', convert);
+
+document.getElementById('copy').addEventListener('click', async () => {
+  output.select();
+  try { await navigator.clipboard.writeText(output.value); }
+  catch (e) { document.execCommand('copy'); }
+  const b = document.getElementById('copy');
+  b.textContent = 'Copied!';
+  setTimeout(() => b.textContent = 'Copy result', 1200);
+});
+
+document.getElementById('clear').addEventListener('click', () => {
+  input.value = ''; output.value = ''; count.textContent = '';
+  input.focus();
+});
+</script>
+</body>
+</html>
